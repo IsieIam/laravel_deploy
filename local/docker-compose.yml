@@ -1,0 +1,66 @@
+version: '3.3'
+services:
+  laravel:
+    # image: ${DH_USERNAME}/laravel:${LARAVEL_VERSION}
+    build:
+      context: ../../laravel/
+    ports:
+      - ${LARAVEL_PORT}:${LARAVEL_PORT}/tcp
+    volumes: 
+      - ./lara.conf:/usr/local/etc/php-fpm.d/www.conf
+    #  - ./.env_lara:/var/www/html/.env
+    env_file:
+      - ./.env_lara
+    environment:
+      DB_CONNECTION: ${DB_IMAGE}
+      DB_HOST: db
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      MEMCACHED_HOST: cache
+      SESSION_DRIVER: memcached
+      CACHE_DRIVER: memcached
+    networks:
+      - my_net
+
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    ports:
+      - ${NGINX_PORT}:${NGINX_PORT}/tcp
+    volumes:
+      - ../../laravel:/var/www/html:cached
+      - ./nginx/lara.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - my_net
+
+  cache:
+    image: memcached:1.6.9-alpine
+    networks:
+      - my_net
+
+  db:
+    image: ${DB_IMAGE}:${DB_VERSION}
+    ports:
+      - ${DB_PORT}:${DB_PORT}/tcp
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    networks:
+      - my_net
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - my_net
+
+networks:
+  my_net:
+    ipam:
+      config:
+        - subnet: "10.0.1.0/24"
