@@ -1,0 +1,184 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "laravel-nginx.fullname" . }}
+  labels:
+    app: laravel
+    release: {{ .Release.Name }}
+data:
+  default.conf: |-
+    upstream php-upstream {
+      server localhost:9000;
+    }
+    # Default website
+    server {
+      listen 80 default_server;
+      root        /var/www/html/public;
+      error_log   /var/log/nginx/lara.error.log warn;
+      add_header X-Frame-Options "SAMEORIGIN";
+      add_header X-Content-Type-Options "nosniff";
+      index index.php;
+      charset utf-8;
+      location / {
+        try_files $uri $uri/ /index.php?$query_string;
+      }
+      location = /favicon.ico { access_log off; log_not_found off; }
+      location = /robots.txt  { access_log off; log_not_found off; }
+      error_page 404 /index.php;
+      location ~ \.php$ {
+        fastcgi_pass php-upstream;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+      }
+      location ~ /\.(?!well-known).* {
+        deny all;
+      }
+    }
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "laravel-nginx.fullname" . }}
+  labels:
+    app: laravel
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laravel
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      name: laravel
+      labels:
+        app: laravel
+        release: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      volumes:
+        - configMap:
+            defaultMode: 256
+            name: {{ template "laravel-nginx.fullname" . }}
+            optional: false
+          name: nginxconf
+        - name: shared-files
+          emptyDir: {}
+      containers:
+        - image: "{{ .Values.image.php.repository }}:{{ .Values.image.php.tag }}"
+          name: laravel-php
+          imagePullPolicy: "Always"
+          volumeMounts:
+            - name: shared-files
+              mountPath: /data
+          ports:
+            - containerPort: {{  .Values.port.php | default 9000 }}
+          livenessProbe:
+            tcpSocket:
+              port: {{  .Values.port.php | default 9000 }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: {{  .Values.port.php | default 9000 }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "cp -r /var/www/html/public/. /data/public"]
+          env:
+            - name: APP_NAME
+              value: Laravel
+            - name: APP_ENV
+              value: local
+            - name: APP_KEY
+              value: "base64:j8GjzUmqxhf0+tGILM7dW7lFkrm32vVY1QUor0GtTUY="
+            - name: APP_DEBUG
+              value: "true"
+            - name: APP_URL
+              value: "{{ .Release.Name }}.{{ .Values.ingress.host | default .Release.Name }}"
+            - name: LOG_CHANNEL
+              value: stack
+            - name: LOG_LEVEL
+              value: debug
+            - name: DB_CONNECTION
+              value: {{ .Values.database.Connection | default (printf "mysql") }}
+            - name: DB_HOST
+              value: {{ .Release.Name }}-{{ .Values.database.Host | default "laravel-database" }}
+            - name: DB_PORT
+              value: {{ .Values.database.Port | default "3306" | quote }}
+            - name: DB_USERNAME
+              value: root
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-{{ .Values.database.Host | default "laravel-database" }}
+                  key: {{ .Values.database.passwordkey | default "mysql-root-password" }}
+            - name: DB_DATABASE
+              value: {{ .Values.database.Name | default "laravel" }}
+            - name: CACHE_DRIVER
+              value: {{ .Values.cache.cachedriver | default "memcached" }}
+            - name: SESSION_DRIVER
+              value: {{ .Values.cache.sessiondriver | default "memcached" }}
+            - name: MEMCACHED_HOST
+              value: {{ .Release.Name }}-{{ .Values.cache.host | default "laravel-cache" }}
+        - image: "{{ .Values.image.nginx.repository }}:{{ .Values.image.nginx.tag }}"
+          name: laravel-nginx
+          volumeMounts:
+            - name: shared-files
+              mountPath: /var/www/html
+            - mountPath: /etc/nginx/conf.d
+              name: nginxconf
+              readOnly: true
+          ports:
+            - containerPort: {{  .Values.port.nginx | default 80 }}
+          livenessProbe:
+            tcpSocket:
+              port: {{  .Values.port.nginx | default 80 }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: {{  .Values.port.nginx | default 80 }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "laravel-nginx.fullname" . }}
+  labels:
+    app: laravel
+    release: {{ .Release.Name }}
+spec:
+  ports:
+    - port: {{ .Values.service.externalPort }}
+      protocol: TCP
+      targetPort: {{ .Values.service.internalPort }}
+  selector:
+    app: laravel
+    release: {{ .Release.Name }}
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "laravel-nginx.fullname" . }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+spec:
+  rules:
+  - host: "{{ .Release.Name }}.{{ .Values.ingress.host | default .Release.Name }}"
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ template "laravel-nginx.fullname" . }}
+          servicePort: {{ .Values.service.externalPort }}

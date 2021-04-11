@@ -1,0 +1,9 @@
+apiVersion: "v2"
+name: laravel-nginx
+version: 1.0.0
+description: laravel php fpm app with nginx as fastcgi proxy
+maintainers:
+  - name: Someone
+    email: my@mail.com
+appVersion: "1.0"
+

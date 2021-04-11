@@ -1,0 +1,32 @@
+---
+image:
+  php:
+    repository: imagewithlaravelapp
+    tag: "1.0"
+  nginx:
+    repository: nginx
+    tag: "stable-alpine"
+
+database:
+  Connection: "mysql"
+  Host: "laravel-database"
+  Port: 3306
+  passwordkey: "mysql-root-password"
+  Name: "laravel"
+
+cache:
+  cachedriver: "memcached"
+  sessiondriver: "memcached"
+  host: "laravel-cache"
+
+port:
+  nginx: 80
+  php: 9000
+
+ingress:
+  class: nginx
+  host: laravel.localhost
+
+service:
+  internalPort: 80
+  externalPort: 8080
