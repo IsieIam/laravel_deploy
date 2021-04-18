@@ -5,12 +5,14 @@ pipeline {
   }
   environment {
     //общие переменные для сред
-    ImagesRepoUri = 'isieiam/laravel'
+    registry = "isieiam/laravel"
     DeployDir = './charts/laravel'
     BuildDir = './src'
     repotobuild = 'https://github.com/IsieIam/laravel.git'
     branchtobuild = 'Release'
     KUBECONFIG = '/var/lib/jenkins/.kube/kubeconfig'
+    registryCredential = 'dockerhub_id'
+    dockerImage = ''
   }
   stages {
     stage('CloneApp') {
@@ -52,7 +54,10 @@ pipeline {
       }
       steps {
         script {
-          sh "docker build --no-cache -t ${ImagesRepoUri}:${VERSION} ${BuildDir}"
+          //sh "docker build --no-cache -t ${ImagesRepoUri}:${VERSION} ${BuildDir}"
+          dir("src"){
+            dockerImage = docker.build registry + ":$VERSION"
+          }
         }
       }
     }
@@ -65,7 +70,10 @@ pipeline {
       }
       steps {
         script {
-          sh "docker push ${ImagesRepoUri}:${VERSION}"
+          //sh "docker push ${ImagesRepoUri}:${VERSION}"
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
         }
       }
     }
@@ -78,7 +86,7 @@ pipeline {
       }
       steps {
         script {
-          sh "docker rmi ${ImagesRepoUri}:${VERSION}"
+          sh "docker rmi $registry:${VERSION}"
         }
       }
     }
