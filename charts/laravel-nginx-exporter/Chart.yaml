@@ -1,0 +1,9 @@
+apiVersion: "v2"
+name: laravel-nginx-exporter
+version: 1.0.0
+description: nginx-exporter
+maintainers:
+  - name: Someone
+    email: my@mail.com
+appVersion: "1.0"
+

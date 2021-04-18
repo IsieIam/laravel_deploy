@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "laravel-nginx-exporter.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "laravel-nginx-exporter.fullname" . }}
+  endpoints:
+  - port: {{ template "laravel-nginx-exporter.fullname" . }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "laravel-nginx-exporter.fullname" . }}
+  labels:
+    app: {{ template "laravel-nginx-exporter.fullname" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "laravel-nginx-exporter.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "laravel-nginx-exporter.fullname" . }}
+    spec:
+      containers:
+        - name: {{ template "laravel-nginx-exporter.fullname" . }}
+          image: nginx/nginx-prometheus-exporter:0.8.0
+          args: ["-nginx.scrape-uri", "{{ printf "http://%s-%s:%s/basic_status" .Release.Name .Values.host .Values.port }}"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "laravel-nginx-exporter.fullname" . }}
+  labels:
+    app: {{ template "laravel-nginx-exporter.fullname" . }}
+spec:
+  selector:
+    app: {{ template "laravel-nginx-exporter.fullname" . }}
+  type: ClusterIP
+  ports:
+    - name: {{ template "laravel-nginx-exporter.fullname" . }}
+      protocol: TCP
+      port: 9113

@@ -13,6 +13,10 @@ data:
     }
     # Default website
     server {
+      # add nginx metrics
+      location = /basic_status {
+        stub_status;
+      }
       listen 80 default_server;
       root        /var/www/html/public;
       error_log   /var/log/nginx/lara.error.log warn;

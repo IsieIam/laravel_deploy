@@ -1,0 +1,3 @@
+---
+host: "laravel-nginx"
+port: "8080"
