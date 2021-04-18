@@ -38,7 +38,7 @@ pipeline {
       steps {
         script{
           //dir("src"){
-            withDockerContainer(args: "-v ${WORKSPACE}/src:/repo /repo", image: 'gittools/gitversion:5.3.5-linux-alpine.3.10-x64-netcoreapp3.1') {
+            withDockerContainer(args: "-v ${WORKSPACE}/src:/repo /repo", image: "gittools/gitversion:5.3.5-linux-alpine.3.10-x64-netcoreapp3.1") {
               sh "gitversion /output buildserver /nofetch /config"
             }
             def properties = readProperties file: 'src/gitversion.properties'
