@@ -10,6 +10,7 @@ pipeline {
     BuildDir = './src'
     repotobuild = 'https://github.com/IsieIam/laravel.git'
     branchtobuild = 'Release'
+    KUBECONFIG = '/var/lib/jenkins/.kube/kubeconfig'
   }
   stages {
     stage('CloneApp') {
