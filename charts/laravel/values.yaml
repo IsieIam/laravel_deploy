@@ -11,7 +11,7 @@ memcached:
 laravel-nginx:
   image:
     php:
-      repository: imagewithlaravelapp
+      repository: isieiam/laravel
       tag: "1.0"
     nginx:
       repository: nginx
@@ -35,8 +35,13 @@ laravel-nginx:
 
   ingress:
     class: nginx
-    host: laravel.localhost
+    #host: laravel.localhost
+    host: 84.252.131.171.nip.io
 
   service:
     internalPort: 80
     externalPort: 8080
+
+laravel-nginx-exporter:
+  host: "laravel-nginx"
+  port: "8080"

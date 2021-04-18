@@ -1,7 +1,7 @@
 ---
 image:
   php:
-    repository: imagewithlaravelapp
+    repository: isieiam/laravel
     tag: "1.0"
   nginx:
     repository: nginx

@@ -14,4 +14,3 @@ vault.key
 .molecule
 .cache
 .pytest_cache
-values.yaml
