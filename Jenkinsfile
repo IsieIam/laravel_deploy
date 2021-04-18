@@ -98,7 +98,8 @@ pipeline {
           sh '''
             cd ${DeployDir}
             helm ls
-            helm upgrade --install larka-stage . -f values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n stage
+            "echo ${VERSION}"
+            "helm upgrade --install larka-stage . -f values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n stage --wait"
           '''
         }
       }
@@ -113,7 +114,7 @@ pipeline {
         script {
           sh '''
             cd ${DeployDir}
-            helm upgrade --install larka . -f values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n prod
+            helm upgrade --install larka . -f values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n prod --wait
           '''
         }
       }
