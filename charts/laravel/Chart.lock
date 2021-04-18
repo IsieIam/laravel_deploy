@@ -1,0 +1,12 @@
+dependencies:
+- name: laravel-nginx
+  repository: file://../laravel-nginx
+  version: 1.0.0
+- name: memcached
+  repository: https://charts.bitnami.com/bitnami
+  version: 5.9.0
+- name: mysql
+  repository: https://charts.bitnami.com/bitnami
+  version: 8.5.1
+digest: sha256:9420ff288bf4ed939cae02dee7ec6cd00551cce9125eca4d014e041e1e3430ff
+generated: "2021-04-10T21:06:41.851999803+03:00"
