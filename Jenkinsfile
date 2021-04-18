@@ -107,7 +107,7 @@ pipeline {
     stage('Deploy Prod') {
       steps {
         script {
-          sh "helm upgrade --install larka ${DeployDir}/. -f ${DeployDir}/values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n stage --wait"
+          sh "helm upgrade --install larka ${DeployDir}/. -f ${DeployDir}/values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n prod --wait"
         }
       }
     }
