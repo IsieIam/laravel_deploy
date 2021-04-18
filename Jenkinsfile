@@ -16,6 +16,7 @@ pipeline {
       when {
         allOf {
           environment name: 'BUILD', value: 'yes'
+          environment name: 'VERSIONTOBUILD', value: 'gitver'
         }
       }
       steps {
@@ -45,6 +46,7 @@ pipeline {
       when {
         allOf {
           environment name: 'BUILD', value: 'yes'
+          environment name: 'VERSIONTOBUILD', value: 'gitver'
         }
       }
       steps {
@@ -57,6 +59,7 @@ pipeline {
       when {
         allOf {
           environment name: 'BUILD', value: 'yes'
+          environment name: 'VERSIONTOBUILD', value: 'gitver'
         }
       }
       steps {
@@ -69,6 +72,7 @@ pipeline {
       when {
         allOf {
           environment name: 'BUILD', value: 'yes'
+          environment name: 'VERSIONTOBUILD', value: 'gitver'
         }
       }
       steps {
