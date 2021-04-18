@@ -6,7 +6,7 @@ pipeline {
   environment {
     //общие переменные для сред
     ImagesRepoUri = 'isieiam/laravel'
-    DeployDir = './charts/laravel/'
+    DeployDir = './charts/laravel'
     BuildDir = './src'
     repotobuild = 'https://github.com/IsieIam/laravel.git'
     branchtobuild = 'Release'
@@ -95,12 +95,7 @@ pipeline {
     stage('Deploy Stage') {
       steps {
         script {
-          sh '''
-            cd ${DeployDir}
-            helm ls
-            "echo ${VERSION}"
-            "helm upgrade --install larka-stage . -f values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n stage --wait"
-          '''
+          sh "helm upgrade --install larka-stage ${DeployDir}/. -f ${DeployDir}/values.yaml --set laravel-nginx.image.php.tag=${VERSION} -n stage --wait"
         }
       }
     }
