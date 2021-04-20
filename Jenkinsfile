@@ -5,12 +5,19 @@ pipeline {
   }
   environment {
     //общие переменные для сред
+    // имя образа
     registry = "isieiam/laravel"
+    // каталог с основным чартом
     DeployDir = './charts/laravel'
+    // каталог куда мы заливаем исходный код приложния
     BuildDir = './src'
+    // адрес репо с которого мы берем исходный код
     repotobuild = 'https://github.com/IsieIam/laravel.git'
+    // ветка релиза для автоматического билда - подразумевается что с репа настроен хук при изменения в этой ветке на начало деплоя 
     branchtobuild = 'Release'
+    // путь до kubeconfig на дженке - так делать не очень красиво, сделано для простоты примера, правильней кубконфиг хранить в кредах дженка
     KUBECONFIG = '/var/lib/jenkins/.kube/kubeconfig'
+    // id кредов для push в докерхаб
     registryCredential = 'dockerhub_id'
     dockerImage = ''
   }
