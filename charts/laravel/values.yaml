@@ -45,3 +45,13 @@ laravel-nginx:
 laravel-nginx-exporter:
   host: "laravel-nginx"
   port: "8080"
+
+flux:
+  git:
+    url: https://github.com/IsieIam/laravel_deploy.git
+    branch: grafana-flux
+    readonly: true
+    path: dashboards
+    pollInterval: 1m
+  registry:
+    automationInterval: 1m

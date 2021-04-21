@@ -11,5 +11,8 @@ dependencies:
 - name: mysql
   repository: https://charts.bitnami.com/bitnami
   version: 8.5.1
-digest: sha256:7f88ec80391233ff0a73845c89330588e7ac336b0c7aae1f33b7443fe0580588
-generated: "2021-04-18T18:05:43.170187193+03:00"
+- name: flux
+  repository: https://charts.fluxcd.io
+  version: 1.8.0
+digest: sha256:4a6fc697442647f4b41339061e69faa2e1f131a2f4a58d8fb3c3cc57cef4d25a
+generated: "2021-04-22T00:17:55.636328471+03:00"

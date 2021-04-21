@@ -23,3 +23,7 @@ dependencies:
   - name: mysql
     version: "8.5.1"
     repository: "https://charts.bitnami.com/bitnami"
+
+  - name: flux
+    version: "1.8.0"
+    repository: "https://charts.fluxcd.io"
