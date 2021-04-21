@@ -35,8 +35,8 @@ laravel-nginx:
 
   ingress:
     class: nginx
-    #host: laravel.localhost
-    host: 84.252.129.137.nip.io
+    host: laravel.localhost
+    #host: 84.252.129.137.nip.io
 
   service:
     internalPort: 80
