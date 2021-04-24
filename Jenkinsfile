@@ -110,7 +110,7 @@ pipeline {
     stage('Deploy Stage') {
       steps {
         script {
-          sh "helm upgrade --install larka-stage ${DeployDir}/. -f ${DeployDir}/values.yaml --set laravel-nginx.image.php.tag=${VERSION},${addtional_args} -n stage --wait"
+          sh "helm upgrade --install larka-stage ${DeployDir}/. -f ${DeployDir}/values.yaml --set laravel-nginx.image.php.tag=${VERSION}${additional_args} -n stage --wait"
         }
       }
     }
@@ -122,7 +122,7 @@ pipeline {
     stage('Deploy Prod') {
       steps {
         script {
-          sh "helm upgrade --install larka ${DeployDir}/. -f ${DeployDir}/values.yaml --set laravel-nginx.image.php.tag=${VERSION},${addtional_args} -n prod --wait"
+          sh "helm upgrade --install larka ${DeployDir}/. -f ${DeployDir}/values.yaml --set laravel-nginx.image.php.tag=${VERSION}${additional_args} -n prod --wait"
         }
       }
     }
