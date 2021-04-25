@@ -4,6 +4,8 @@
 // additional_args - string parameter - может быть пустым или доп списком параметров к параметру helm --set, для примера на ходу переопределить внешний адрес сервиса.
 // для примера, обратить внимание на зпт в начале: ,laravel-nginx.ingress.host=84.252.131.52.nip.io
 
+// часть этапов выполняться будут в зависимости от значений параметров - есть build нам не нужен то этапы связанные с самим docker образом пропускаются
+
 def VERSION="${VERSIONTOBUILD}"
 pipeline {
   agent {
@@ -28,6 +30,7 @@ pipeline {
     dockerImage = ''
   }
   stages {
+    // Забираем исходныйй код приложения из его репо по адресу репо и ветки для забора
     stage('CloneApp') {
       when {
         allOf {
@@ -42,6 +45,7 @@ pipeline {
           }
       }
     }
+    // Определяем версию приложения через gitbersiontask, которая сама запускается в докер контейнере (это дает возможность не ставить полноценную версию на worker ноду jenkins)
     stage ('GitVersionTask') {
       when {
         allOf {
@@ -54,10 +58,12 @@ pipeline {
             sh "cd /repo && /tools/dotnet-gitversion /repo /output buildserver /nofetch /config"
           }
           def properties = readProperties file: 'src/gitversion.properties'
+          // вот именно здесь определяется версия нашего образа/приложения компновкой собранных фактов о репо приложения утилитой gitverion task
           VERSION="${properties['GitVersion_MajorMinorPatch']}-${properties['GitVersion_CommitsSinceVersionSource']}"
         }
       }
     }
+    // билдим образ - все просто
     stage('Build') {
       when {
         allOf {
@@ -74,6 +80,7 @@ pipeline {
         }
       }
     }
+    // пушим образ в регистри
     stage('Upload') {
       when {
         allOf {
@@ -90,6 +97,7 @@ pipeline {
         }
       }
     }
+    // удаляем собранный образ с worker ноды Jenkins
     stage("Cleanup") {
       when {
         allOf {
@@ -103,6 +111,7 @@ pipeline {
         }
       }
     }
+    // подготавливаем helm - устанавливаем зависимости
     stage('prepare helm') {
       steps {
         script{
@@ -113,6 +122,7 @@ pipeline {
         }
       }
     }
+    // деплоим наше приложение из helm- чарта на stage
     stage('Deploy Stage') {
       steps {
         script {
@@ -120,11 +130,13 @@ pipeline {
         }
       }
     }
+    // этап для запуска автотестов
     stage('Tests') {
       steps {
         echo "some tests"
       }
     }
+    // деплоим наше приложение из helm- чарта на prod
     stage('Deploy Prod') {
       steps {
         script {
@@ -133,6 +145,7 @@ pipeline {
       }
     }
   }
+  // post действие
   post {
     always {
       echo 'Cleanup'
